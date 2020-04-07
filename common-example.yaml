@@ -1,0 +1,83 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: special-config
+  namespace: default
+data:
+  special.how: very
+
+---
+apiVersion: stable.opencore.com/v1
+kind: ActiveDirectory
+metadata:
+  name: centralAd
+  namespace: default
+data:
+  adUrl: ...
+
+---
+apiVersion: stable.opencore.com/v1
+kind: RangerPolicySet
+metadata:
+  name: prod-policies
+  namespace: default
+spec:
+  policies:
+    - user: lfrancke
+      path: /data
+      acl: rw
+  policySetRefs:
+    - prod-eng-policies
+    - prod-hr-policies
+
+---
+apiVersion: stable.opencore.com/v1
+kind: ExternalLogStorage # Evtl. wird es ein spezialisierter ElasticsearchLogStorage
+metadata:
+  name: prod-elk
+spec:
+  type: elasticsearch
+  url: foobar
+  secretRef: ...
+  index: ...
+
+---
+apiVersion: stable.opencore.com/v1
+kind: RangerPolicySet
+metadata:
+  name: prod-policies
+  namespace: default
+spec:
+  policies:
+    - user: lfrancke
+      path: /data
+      acl: rw
+  policySetRefs:
+    - prod-eng-policies
+    - prod-hr-policies
+
+
+---
+apiVersion: stable.opencore.com/v1
+kind: Node
+metadata:
+  environment: production
+  disks: 8
+  hostName: server-01.opencore.io
+  network: 10GBit
+
+
+---
+apiVersion: stable.opencore.com/v1
+kind: ExternalKafkaCluster
+...
+  name: edge-kafka-unmanaged
+
+
+
+
+
+
+
+POST /api/v1/stable.opencore.com/v1/HDFS/rebalanceHDFS

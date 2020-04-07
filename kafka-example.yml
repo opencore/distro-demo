@@ -1,0 +1,111 @@
+---
+apiVersion: stable.opencore.com/v1
+kind: Kafka
+
+metadata:
+  name: kafka-prod
+  labels:
+    environment: production
+spec:
+  broker:
+    zooKeeperRef: ...
+
+    # TODO: Wir sind uns nicht sicher ob wir ein minNodeCount brauchen
+    maxNodeCount: ...
+    nodeSelector:
+      ...
+    listener:
+      - type: unauthenticated
+        port: 9092
+      - type: kerberos
+        tls_encryption: true
+        ...
+      - type: tls
+        tls_encryption: true
+        ...
+      - type: kerberos
+        tls_encryiption: false
+        advertisedListener: ...
+        ...
+
+
+    config:
+      linger.ms: 500
+      ...
+    configMapRef:
+      name: special-config
+      priority: 1
+    roleConfig:
+      - selector:
+          diskType: ssd
+        config:
+          ...
+        configMapRef:
+      - selector:
+          hostName: server-01.opencore.io
+        config:
+          ...
+        configMapRef: ...
+
+  # TODO: Filter und Redaction rules, Filter = Was wird nach extern geschrieben (z.B. DEBUG in einen ELK, ERROR in einen anderen)
+  logging:
+    retention: ...
+    rollingInterval: ...
+    defaultExternalLogStorageRef: prod-elk
+    # TODO: Evtl. auch diese Sachen in eigene Objekte auslagern damit sie wiederverwendbar sind
+    brokerLog:
+      collect: true
+      externalLogStorageRef: prod-audit-elk
+      logLevel:
+        ...
+    brokerStdout:
+      collect: true
+
+  metrics:
+    metricsStorageRef: ...
+    blacklist: ... # Metriken, die nicht reported werden sollen
+    whitelist: ...
+
+# TODO: Consumer- und Producermetriken ggf. auch abbilden? "ExternalConsumer" (unmanaged)
+# TODO: Wie behandeln wir broker Ids?
+
+
+
+# MirrorMaker2
+# TODO: Das hier ist noch weit entfernt von vollständig
+---
+apiVersion: stable.opencore.com/v1
+kind: MirrorMaker
+metadata:
+  name: mirrormaker-prod
+  labels:
+    environment: production
+spec:
+  # [standalone, legacy, connect, cluster]
+  mode: standalone
+  nodeSelector:
+    ...
+  kafkaClusters:
+    - kafka-prod
+    - kafka-dev
+    - edge-kafka-unmanaged
+
+
+---
+apiVersion: stable.opencore.com/v1
+kind: KafkaReplication
+...
+
+sourceCluster: kafka-prod
+targetCluster: kafka-dev
+sourceTopic: foobar
+  topicSetRef:
+targetTopic: barfoo
+offsets: true
+config: false
+
+---
+apiVersion: stable.opencore.com/v1
+kind: KafkaTopicSet
+...
+

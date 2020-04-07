@@ -1,0 +1,132 @@
+---
+apiVersion: stable.opencore.com/v1
+kind: HDFS
+
+metadata:
+  name: hdfs-prod
+  labels:
+    environment: production
+    paidForBy: HR
+spec:
+  config:
+    # Globale Konfigurationen hier
+  configMapRef:
+    # Globale ConfigMaps hier
+
+  # TODO: Weitere Ranger Properties angeben, gibt es HDFS Properties, die wir bei Ranger injecten müssen?
+  rangerServiceRef: ...
+  rangerPolicySetRef: prod-policies # Möglicherweise mehrere erlauben
+
+  # Nur bei HA benötigt
+  zooKeeperRef: ...
+
+  roleConfig:
+    - selector:
+        diskType: ssd
+      config:
+      configMapRef:
+      priority:
+    - selector:
+        diskCount: 8
+      config:
+      configMapRef:
+
+
+  nameNode: # Failover Controller muss hier auch laufen falls HA
+    minNodeCount: 1
+    maxNodeCount: 3
+    highAvailable: true
+    runAsLinuxUser: hdfs
+    nodeSelector:
+      env: production
+      type: master
+      diskType: ssd
+      paidForBy: Marketing
+      hostName: server-0[1-3].opencore.io
+    jvmOptions: ...
+    config:
+      dfs.namenode.disks: /foo/01, /foo/02 # TODO: Können kommaseparierte Werte irgendwie strukturierter abgelegt werden?
+      dfs.namenode.http.principal: HTTP
+    configMapRef: # TODO: Brauchen wir hier mehrere? Wenn ja, wie mergen die? Vorschlag: Priorität vorgeben
+      name: special-config
+      priority: 1
+    roleConfig:
+      - selector:
+          diskType: ssd
+        config:
+          ...
+        configMapRef:
+      - selector:
+          hostName: server-03.opencore.io
+        config:
+          dfs.datanode.disks:/foo/01,/foo/03 # /foo/02 ist kaputt
+          ...
+        configMapRef:
+
+
+  secondaryNameNode: # Optional falls HA an ist nicht benötigt
+    ...
+
+  journalNode: # TODO: Optional falls nameNodeCount = 1
+    minNodeCount: 2
+    maxNodeCount: 3
+    nodeSelector:
+      env: production
+      type: master
+    config:
+      dfs.namenode.disks: /foo/01, /foo/02 # TODO: Können kommaseparierte Werte irgendwie strukturierter abgelegt werden?
+    configMapRef: # TODO: Brauchen wir hier mehrere? Wenn ja, wie mergen die? Vorschlag: Priorität vorgeben
+      name: special-config
+      priority: 1
+
+  dataNode:
+    minNodeCount: 3
+    maxNodeCount: 10
+    nodeSelector:
+      env: production
+      type: master
+    config:
+      dfs.namenode.disks: /foo/01, /foo/02 # TODO: Können kommaseparierte Werte irgendwie strukturierter abgelegt werden?
+    configMapRef: # TODO: Brauchen wir hier mehrere? Wenn ja, wie mergen die? Vorschlag: Priorität vorgeben
+      name: special-config
+      priority: 1
+
+  kerberos:
+    enabled: true
+    customKeytabScript: /opt/distro/keytabs.sh
+    nodeSelector: # Selektiert den Rechner auf dem es läuft
+      ...
+
+    # TODO: In secrets auslagern
+    adRef: centalAd
+    adHost:
+    adPassword:
+    adUsername:
+    ipa: ...
+
+  tls:
+    enabled: true
+    certOrg: ...
+    certCN: ...
+    certExtendedKeyUsage: clientAuth, serverAuth
+    certProviderRef: foobar
+
+  # Überschreibbar pro Logfiletyp
+  logging:
+    retention: ...
+    rollingInterval: ...
+    defaultExternalLogStorageRef: prod-elk
+    # TODO: Evtl. auch diese Sachen in eigene Objekte auslagern damit sie wiederverwendbar sind
+    nameNodeAuditLog:
+      collect: true
+      externalLogStorageRef: prod-audit-elk
+    nameNodeStdout:
+      collect: true
+
+  metrics:
+    metricsStorageRef: ...
+    blacklist: ...
+    whitelist: ...
+
+
+# TODO: HttpFS, NFS Gateway als eigener Service oder hier rein?
