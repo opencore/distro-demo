@@ -1,0 +1,7 @@
+= Orchestration System
+
+This repository contains a few examples on how to declaratively define services in an Orchestration System. The syntax should be compatible to the Kubernetes syntax.
+
+* link:hdfs-example.yaml[hdfs-example.yaml]
+* link:hdfs-crd.yaml[hdfs-crd.yaml]
+* link:kafka-example.yaml[kafka-example.yaml]

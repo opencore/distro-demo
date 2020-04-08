@@ -33,7 +33,7 @@ spec:
 
 ---
 apiVersion: stable.opencore.com/v1
-kind: ExternalLogStorage # Evtl. wird es ein spezialisierter ElasticsearchLogStorage
+kind: ExternalLogStorage # TODO: Do we need an "ElasticsearchExternalLogStorage"? Check with K8S best-practices
 metadata:
   name: prod-elk
 spec:
@@ -57,7 +57,6 @@ spec:
     - prod-eng-policies
     - prod-hr-policies
 
-
 ---
 apiVersion: stable.opencore.com/v1
 kind: Node
@@ -67,17 +66,8 @@ metadata:
   hostName: server-01.opencore.io
   network: 10GBit
 
-
 ---
 apiVersion: stable.opencore.com/v1
 kind: ExternalKafkaCluster
 ...
   name: edge-kafka-unmanaged
-
-
-
-
-
-
-
-POST /api/v1/stable.opencore.com/v1/HDFS/rebalanceHDFS
