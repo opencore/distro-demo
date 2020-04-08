@@ -5,3 +5,4 @@ This repository contains a few examples on how to declaratively define services 
 * link:hdfs-example.yaml[hdfs-example.yaml]
 * link:hdfs-crd.yaml[hdfs-crd.yaml]
 * link:kafka-example.yaml[kafka-example.yaml]
+* link:common-example.yaml[common-example.yaml]
