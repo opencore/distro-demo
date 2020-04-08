@@ -10,8 +10,7 @@ spec:
   broker:
     zooKeeperRef: ...
 
-    # TODO: Wir sind uns nicht sicher ob wir ein minNodeCount brauchen
-    maxNodeCount: ...
+    # TODO: We are unsure if we actually need a min node count here
     nodeSelector:
       ...
     listener:
@@ -47,12 +46,12 @@ spec:
           ...
         configMapRef: ...
 
-  # TODO: Filter und Redaction rules, Filter = Was wird nach extern geschrieben (z.B. DEBUG in einen ELK, ERROR in einen anderen)
-  logging:
+  # TODO: Filter and redaction rules(for example: DEBUG to Elastic cluster A, ERROR to Elastic cluster B)
+ logging:
     retention: ...
     rollingInterval: ...
     defaultExternalLogStorageRef: prod-elk
-    # TODO: Evtl. auch diese Sachen in eigene Objekte auslagern damit sie wiederverwendbar sind
+    # TODO: Refactor these definitions to separate objects to make them re-useable
     brokerLog:
       collect: true
       externalLogStorageRef: prod-audit-elk
@@ -66,13 +65,15 @@ spec:
     blacklist: ... # Metriken, die nicht reported werden sollen
     whitelist: ...
 
-# TODO: Consumer- und Producermetriken ggf. auch abbilden? "ExternalConsumer" (unmanaged)
-# TODO: Wie behandeln wir broker Ids?
+# TODO: Add the concept of an external client - 10.0.0.5 should always be running a kafka consumer,
+# we would grab the jmx metrics as well and export them
+# "ExternanConsumer" -> unmanaged but known
 
+# How to treat broker-ids?
 
 
 # MirrorMaker2
-# TODO: Das hier ist noch weit entfernt von vollständig
+# TODO: This is far removed from being complete
 ---
 apiVersion: stable.opencore.com/v1
 kind: MirrorMaker
@@ -108,4 +109,3 @@ config: false
 apiVersion: stable.opencore.com/v1
 kind: KafkaTopicSet
 ...
-
