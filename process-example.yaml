@@ -1,0 +1,30 @@
+---
+apiVersion: stable.opencore.com/v1
+kind: Process
+
+metadata:
+  name: hdfs-datanode-server01.opencore.io
+
+spec:
+  command: foobar
+
+  # Only one of these should be set at the same time
+  baseParcel: ...
+  basePath: ...
+
+  environment:
+    ONE: one
+    TWO: two
+  restartOnFailure: no
+  files:
+    - type: plain
+      source: embedded
+      content: foobar
+    - type: template
+      source: vault
+      vaultId: foobar123
+      redactAfterStart: TODO
+    - type: plain
+      source: url
+      url: https://operator/bla
+
